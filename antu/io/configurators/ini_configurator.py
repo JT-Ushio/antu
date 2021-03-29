@@ -3,6 +3,7 @@ from ...utils.case_sensitive_configurator import CaseSensConfigParser
 import argparse
 import os
 import ast
+from configparser import ExtendedInterpolation
 
 
 BaseObj = TypeVar("BaseObj", int, float, str, list, set, dict)
@@ -59,7 +60,7 @@ class IniConfigurator:
                  config_file: str,
                  extra_args: Dict[str, str] = dict()) -> None:
 
-        config = CaseSensConfigParser()
+        config = CaseSensConfigParser(interpolation=ExtendedInterpolation())
         config.read(config_file)
         if extra_args:
             extra_args = (
@@ -71,13 +72,22 @@ class IniConfigurator:
                 if k in extra_args:
                     v = type(v)(extra_args[k])
                     config.set(section, k, v)
+                    if k in attr_name:
+                        raise RuntimeError(
+                            'Attribute (%s) has already appeared.' % (k))
+                    else:
+                        attr_name.update(k)
+                    super(IniConfigurator, self).__setattr__(k, str_to_baseobj(v))
 
-                if k in attr_name:
-                    raise RuntimeError(
-                        'Attribute (%s) has already appeared.' % (k))
-                else:
-                    attr_name.update(k)
-                super(IniConfigurator, self).__setattr__(k, str_to_baseobj(v))
+        for section in config.sections():
+            for k, v in config.items(section):
+                if k not in extra_args:
+                    if k in attr_name:
+                        raise RuntimeError(
+                            'Attribute (%s) has already appeared.' % (k))
+                    else:
+                        attr_name.update(k)
+                    super(IniConfigurator, self).__setattr__(k, str_to_baseobj(v))
 
         with open(config_file, 'w') as fout:
             config.write(fout)
