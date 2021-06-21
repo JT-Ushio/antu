@@ -42,8 +42,8 @@ class CharTokenIndexer(TokenIndexer):
         """
         for vocab_name in self.related_vocabs:
             if vocab_name in counters:
-                for ch in token:
-                    counters[vocab_name][self.transform(ch)] += 1
+                for ch in self.transform(token):
+                    counters[vocab_name][ch] += 1
 
     @overrides
     def tokens_to_indices(
@@ -66,7 +66,7 @@ class CharTokenIndexer(TokenIndexer):
 
             for token in tokens:
                 index_list.append(
-                    [vocab.get_token_index(self.transform(ch), vocab_name)
-                     for ch in token])
+                    [vocab.get_token_index(ch, vocab_name)
+                     for ch in self.transform(token)])
             res[vocab_name] = index_list
         return res

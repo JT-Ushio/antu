@@ -7,7 +7,7 @@ from . import Field
 
 class MetaField(Field):
     """
-    A ``IndexField`` is an integer field, and we can use it to store data ID.
+    A ``MetaField`` is a raw token field, and we can use it to store raw data.
 
     Parameters
     ----------
@@ -39,15 +39,13 @@ class MetaField(Field):
     @overrides
     def count_vocab_items(self, counters: Dict[str, Dict[str, int]]) -> None:
         """
-        ``IndexField`` doesn't need index operation.
+        ``MetaField`` doesn't need index operation.
         """
         pass
 
     @overrides
     def index(self, vocab: Vocabulary) -> None:
         """
-        ``IndexField`` doesn't need index operation.
+        ``MetaField`` doesn't need index operation.
         """
-        # self.indexes = dict()
-        # self.indexes[self.name] = self.tokens
         self.indexes = self.tokens
