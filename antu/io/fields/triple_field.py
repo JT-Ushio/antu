@@ -23,7 +23,7 @@ class TripleField(Field):
 
     def __init__(self,
                  name: str,
-                 tokens: List[List[List, List, str]],
+                 tokens: List,
                  indexers: List[TokenIndexer] = list()):
         self.name = name
         self.tokens = tokens
