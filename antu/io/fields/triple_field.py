@@ -7,7 +7,7 @@ from . import Field
 
 class TripleField(Field):
     """
-    A ``TripleField`` is a data field that is commonly used in NLP Relation Extraction tasks, and we
+    A ``TripleField`` is a data field that is commonly used in NLP Relation Extraction task, and we
     can use it to store triples in an instance.
 
     Parameters
@@ -15,8 +15,8 @@ class TripleField(Field):
     name : ``str``
         Field name. This is necessary and must be unique (not the same as other
         field names).
-    tokens : ``List[List[List, List, str]]``
-        Field content that contains a list of triple. A triple consists of [entity1_description, entity2_description, relation]
+    tokens : ``List``
+        Field content contains a list of triple. The shape of a triple is like [entity1_description, entity2_description, relation].
     indexers : ``List[TokenIndexer]``, optional (default=``list()``)
         Indexer list that defines the vocabularies associated with the field.
     """
@@ -57,7 +57,7 @@ class TripleField(Field):
         """
         for idxer in self.indexers:
             for token in self.tokens:
-                idxer.count_vocab_items(token[0][2], counters)
+                idxer.count_vocab_items(token[2], counters)
 
     @overrides
     def index(self, vocab: Vocabulary) -> None:
@@ -70,5 +70,14 @@ class TripleField(Field):
             ``vocab`` is used to get the index of each relation
         """
         self.indexes = {}
+        self.indexes['rel'] = []
         for idxer in self.indexers:
-            self.indexes.update(idxer.tokens_to_indices(self.tokens[0][2], vocab))
+            rels = [token[2] for token in self.tokens]
+            rel_indices = idxer.tokens_to_indices(rels, vocab)
+            
+            for i in range(len(self.tokens)):
+                token = self.tokens[i]
+                rel_index = rel_indices['rel'][i]
+                triple_index = [token[0], token[1], rel_index]
+
+                self.indexes['rel'].append(triple_index)
